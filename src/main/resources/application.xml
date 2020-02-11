@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!-- bean definitions here -->
+    <context:property-placeholder location="classpath:application.properties"/>
+
+    <bean id="fileLoader" class="ru.denku.io.FileLoader">
+        <constructor-arg name="fileName">
+            <value>${loader.fileName}</value>
+        </constructor-arg>
+    </bean>
+
+    <bean id="csvParser" class="ru.denku.csv.CsvParser"/>
+
+    <bean id="csvMapper" class="ru.denku.csv.CsvMapper">
+        <constructor-arg ref="csvParser"/>
+    </bean>
+
+    <bean id="questionsRepository" class="ru.denku.domain.QuestionsRepository">
+        <constructor-arg name="loader" ref="fileLoader"/>
+        <constructor-arg name="mapper" ref="csvMapper"/>
+    </bean>
+
+    <bean id="testCreator" class="ru.denku.domain.TestCreator">
+        <constructor-arg name="questionsCount" value="${test.questionsCount}"/>
+        <constructor-arg name="numberOfErrors" value="${test.numbersOfErrors}"/>
+        <constructor-arg name="repository" ref="questionsRepository"/>
+    </bean>
+
+    <bean id="consoleReader" class="ru.denku.io.ConsoleReaderImpl"/>
+
+    <bean id="consolePrinter" class="ru.denku.io.ConsolePrinter"/>
+
+    <bean id="viewReader" class="ru.denku.io.ViewReaderImpl">
+        <constructor-arg ref="consoleReader"/>
+    </bean>
+
+    <bean id="viewPrinter" class="ru.denku.io.ViewPrinterImpl">
+        <constructor-arg ref="consolePrinter"/>
+    </bean>
+
+    <bean id="testView" class="ru.denku.domain.TestView">
+        <constructor-arg name="printer" ref="viewPrinter"/>
+        <constructor-arg name="reader" ref="viewReader"/>
+    </bean>
+
+    <bean name="analyzer" class="ru.denku.domain.TestAnalyzer"/>
+
+    <bean name="testService" class="ru.denku.domain.TestService">
+        <constructor-arg name="creator" ref="testCreator"/>
+        <constructor-arg name="view" ref="testView"/>
+        <constructor-arg name="analyzer" ref="analyzer"/>
+    </bean>
+</beans>
