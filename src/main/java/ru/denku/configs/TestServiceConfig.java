@@ -28,8 +28,8 @@ public class TestServiceConfig {
 
     @Bean
     Runner testService(Creator creator,
-                       View view,
+                       ViewFactory viewFactory,
                        Analyzer analyzer) {
-        return new TestService(creator, view, analyzer);
+        return new TestService(creator, viewFactory, analyzer);
     }
 }

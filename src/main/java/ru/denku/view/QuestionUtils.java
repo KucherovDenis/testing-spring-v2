@@ -1,4 +1,4 @@
-package ru.denku.domain;
+package ru.denku.view;
 
 import ru.denku.entity.Answer;
 import ru.denku.entity.QuestionDTO;
