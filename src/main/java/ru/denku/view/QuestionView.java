@@ -16,24 +16,23 @@ public class QuestionView extends AbstractView {
         super(printer, reader);
     }
 
-    private void printQuestion(int num, QuestionDTO question) {
-        getPrinter().printLine(String.format("Вопрос №%d %s",
+    private void printQuestion(Printer printer, int num, QuestionDTO question) {
+        printer.printLine(String.format("Вопрос №%d %s",
                 num,
                 question.getText()
         ));
-        getPrinter().printLine(EMPTY_STRING);
+        printer.printLine(EMPTY_STRING);
         List<Answer> answers = question.getAnswers();
         for (int i = 0; i < answers.size(); i++) {
-            getPrinter().printLine(String.format("%d. %s", i + 1, answers.get(i).getText()));
+            printer.printLine(String.format("%d. %s", i + 1, answers.get(i).getText()));
         }
-        getPrinter().printLine(EMPTY_STRING);
-        getPrinter().printLine("Введите варианты ответа:");
-
     }
 
-    private List<Integer> readAnswer(int min, int max) {
+    private QuestionDTO question;
+
+    private List<Integer> readAnswer(ConsoleReader reader, int min, int max) {
         List<Integer> answers = new ArrayList<>();
-        String answersStr = getReader().readString();
+        String answersStr = reader.readString();
         for (char c : answersStr.toCharArray()) {
             int userAnswer = Integer.parseInt(Character.toString(c));
             if(userAnswer >= min && userAnswer <= max) {
@@ -44,18 +43,26 @@ public class QuestionView extends AbstractView {
     }
 
     @Override
-    public ViewResult showView(ViewArgs args) {
+    protected void doWrite(Printer printer, ViewArgs args) {
         if (args.isEmpty()) throw new ApplicationException("Не заданы входные параметры.");
 
         int num = (Integer) args.get("num");
         QuestionDTO question = (QuestionDTO) args.get("question");
         if (question == null) throw new ApplicationException("Не задан параметр question.");
 
-        printQuestion(num, question);
+        this.question = question;
+        printQuestion(printer, num, question);
+    }
+
+    @Override
+    protected ViewResult doRead(Printer printer, ConsoleReader reader) {
+        printer.printLine(EMPTY_STRING);
+        printer.printLine("Введите варианты ответа:");
+
         String userAnswer;
         while (true) {
             try {
-                List<Integer> answers = readAnswer(1, question.getAnswers().size());
+                List<Integer> answers = readAnswer(reader, 1, question.getAnswers().size());
                 userAnswer = QuestionUtils.answersMapById(question, answers);
                 if (userAnswer.isEmpty()) {
                     printInputError();

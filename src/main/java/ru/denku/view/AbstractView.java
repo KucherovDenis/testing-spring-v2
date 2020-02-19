@@ -18,15 +18,17 @@ public abstract class AbstractView implements View {
         this.reader = Objects.requireNonNull(reader);
     }
 
-    protected Printer getPrinter() {
-        return printer;
+    protected abstract void doWrite(Printer printer, ViewArgs args);
+
+    protected abstract ViewResult doRead(Printer printer, ConsoleReader reader);
+
+    @Override
+    public ViewResult showView(ViewArgs args) {
+        doWrite(printer, args);
+        return doRead(printer, reader);
     }
 
-    protected ConsoleReader getReader() {
-        return reader;
-    }
-
-    public void printInputError() {
+    protected void printInputError() {
         printer.printLine("Не корректный ввод ответа. Повторите ввод.", ConsoleColor.RED);
         printer.printLine("Введите варианты ответа:");
     }
